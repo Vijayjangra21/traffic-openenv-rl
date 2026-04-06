@@ -42,9 +42,6 @@ This project addresses the problem by enabling an AI agent to **learn optimal si
   "waiting_times": [w1, w2, w3, w4]
 }
 ````
-
----
-
 ### 🎮 Action
 
 ```python
