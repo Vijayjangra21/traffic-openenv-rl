@@ -204,6 +204,3 @@ This project demonstrates how reinforcement learning can be applied to real-worl
 ## 🔑 Keywords
 
 Reinforcement Learning, OpenEnv, Traffic Control, Simulation, AI Systems, Optimization
-
-```
-
