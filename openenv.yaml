@@ -1,0 +1,13 @@
+name: traffic_control_env
+
+observation_space:
+  queue_lengths: int[4]
+  waiting_times: int[4]
+
+action_space:
+  lane: int (0-3)
+
+tasks:
+  - easy
+  - medium
+  - hard
