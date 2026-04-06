@@ -41,3 +41,6 @@ def evaluate():
         print(f"Baseline Wait: {baseline_wait}")
         print(f"Random Wait: {random_wait}")
         print(f"Score: {score:.2f}")
+
+if __name__ == "__main__":
+    evaluate()
