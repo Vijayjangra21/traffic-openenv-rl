@@ -48,3 +48,5 @@ class TrafficEnv:
         reward = - (total_cars + total_wait)
 
         return self.get_state(), reward, False, {}
+    def state(self):
+        return self.get_state()
