@@ -68,3 +68,9 @@ def run_task(mode):
 if __name__ == "__main__":
     for mode in ["easy", "medium", "hard"]:
         run_task(mode)
+
+    # 🔥 Keep container alive (IMPORTANT for HF Spaces)
+    import time
+    print("Inference completed. Keeping container alive...")
+    while True:
+        time.sleep(60)
