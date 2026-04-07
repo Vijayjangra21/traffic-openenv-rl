@@ -6,7 +6,7 @@ This project implements an **OpenEnv-compliant reinforcement learning environmen
 
 The system simulates a traffic intersection where an RL agent dynamically selects which lane receives a green signal, with the goal of reducing congestion and waiting time.
 
-It is designed as a **decision-making environment** with a complete pipeline including environment, baseline, training, evaluation, and Docker deployment.
+It provides a **complete pipeline** including environment design, baseline, training, evaluation, inference, and Docker deployment.
 
 ---
 
@@ -24,13 +24,14 @@ This project enables an AI agent to **learn optimal signal control strategies dy
 
 ## 🧠 Key Features
 
-- ✅ OpenEnv-style environment (`reset`, `step`, `state`)
-- ✅ Realistic traffic simulation (4-lane intersection)
+- ✅ OpenEnv-compliant API (`reset`, `step`, `state`)
+- ✅ Realistic 4-lane traffic simulation
 - ✅ 3 difficulty levels (easy, medium, hard)
-- ✅ Reinforcement learning agent (DQN-based)
-- ✅ Baseline comparison (heuristic policy)
+- ✅ DQN-based RL agent
+- ✅ Baseline comparison
 - ✅ Deterministic grading system (0–1 score)
 - ✅ Fully Dockerized (reproducible execution)
+- ✅ Inference script with structured logs
 
 ---
 
@@ -53,8 +54,6 @@ This project enables an AI agent to **learn optimal signal control strategies dy
 {"lane": 0-3}
 ```
 
-The agent selects which lane gets the green signal.
-
 ---
 
 ### 🎯 Reward Function
@@ -64,58 +63,45 @@ reward = - (total_queue_length + total_waiting_time)
 ```
 
 * Penalizes congestion
-* Encourages clearing high-density lanes
+* Encourages efficient traffic flow
 * Provides continuous learning signal
 
 ---
 
-## 🧪 Tasks (Difficulty Levels)
+## 🧪 Tasks
 
-| Mode      | Description                      |
-| --------- | -------------------------------- |
-| 🟢 Easy   | Low traffic, stable conditions   |
-| 🟡 Medium | Moderate traffic with randomness |
-| 🔴 Hard   | High congestion and imbalance    |
+| Mode   | Description                      |
+| ------ | -------------------------------- |
+| Easy   | Low traffic, stable conditions   |
+| Medium | Moderate traffic with randomness |
+| Hard   | High congestion and imbalance    |
 
 ---
 
 ## 🤖 Approach
 
-* Deep Q-Network (DQN) implemented using PyTorch
-* Input: 8-dimensional state (queue + waiting)
-* Output: 4 possible actions (lanes)
-* Epsilon-greedy policy for exploration
-* Trained over multiple episodes
-* Trained with fixed random seeds for reproducibility
+* Deep Q-Network (DQN) using PyTorch
+* Input: 8-dimensional state
+* Output: 4 actions (lanes)
+* Epsilon-greedy exploration
+* Trained with fixed seeds for reproducibility
 
 ---
 
-## ⚖️ Evaluation & Grading
-
-Performance is measured relative to a baseline:
+## ⚖️ Evaluation
 
 ```python
 score = baseline_wait / agent_wait
 score = min(score, 1.0)
 ```
 
-* Score range: **0.0 – 1.0**
-* Higher score = better performance
-
 ---
 
-## 🧠 Baseline Agent
-
-A simple heuristic baseline:
+## 🧠 Baseline
 
 ```python
 select lane with maximum queue length
 ```
-
-Used for:
-
-* Performance comparison
-* Score normalization
 
 ---
 
@@ -127,12 +113,13 @@ Used for:
 | Medium | 0.54  |
 | Hard   | 0.42  |
 
-### Observations:
+### Observations
 
 * Agent learns to prioritize congested lanes
 * Outperforms baseline in medium and hard scenarios
 * Demonstrates adaptive decision-making
 * Performance improves significantly over baseline in non-trivial scenarios
+
 ---
 
 ## 🚀 How to Run
@@ -161,7 +148,35 @@ python run_baseline.py
 
 ---
 
-## 🐳 Docker Support
+## 🚀 Inference (OpenEnv Evaluation)
+
+```bash
+python inference.py
+```
+
+### Output format
+
+```
+[START]
+[STEP]
+[END]
+```
+
+---
+
+## 🔐 Environment Variables
+
+Set before running inference:
+
+```bash
+API_BASE_URL
+MODEL_NAME
+HF_TOKEN
+```
+
+---
+
+## 🐳 Docker
 
 ```bash
 docker build -t traffic_env .
@@ -183,6 +198,7 @@ traffic-openenv-rl/
 │── run_baseline.py
 │── models.py
 │── openenv.yaml
+│── inference.py
 │── Dockerfile
 │── requirements.txt
 │── README.md
@@ -192,33 +208,33 @@ traffic-openenv-rl/
 
 ## 🌍 OpenEnv Compliance
 
-* `reset()` → initializes environment
-* `step(action)` → returns next state, reward
-* Structured tasks and grading
-* Fully reproducible setup
+* `reset()` → initialize environment
+* `step(action)` → returns next state and reward
+* `state()` → returns current state
+* Tasks with deterministic graders
+* Reproducible evaluation
 
 ---
 
 ## 💡 Use Case
 
-This environment models a **resource allocation problem**, where limited signal time must be distributed across competing traffic lanes under dynamic conditions.
+This environment models a **real-world resource allocation problem**, where limited signal time must be distributed across competing traffic lanes under dynamic conditions.
 
 ---
 
 ## 🚀 Future Improvements
 
 * Multi-intersection coordination
-* Integration with YOLO (real-time traffic input)
+* YOLO-based real-time traffic input
 * Advanced RL methods (Replay Buffer, PPO)
-* Smart city deployment
 
 ---
 
 ## 🏆 Conclusion
 
-This project demonstrates a complete RL pipeline for traffic optimization, including environment design, training, evaluation, and deployment.
+This project demonstrates a complete RL system for traffic optimization, including environment design, training, evaluation, and deployment.
 
-It highlights how **well-structured environments and evaluation systems are critical for building effective AI solutions**.
+It highlights how **well-structured environments and evaluation pipelines are critical for building effective AI systems**.
 
 ---
 
