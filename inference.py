@@ -1,22 +1,32 @@
 import os
 from env import TrafficEnv
 
-# Try importing OpenAI (optional)
+# -------- REQUIRED ENV VARIABLES --------
+API_BASE_URL = os.getenv("API_BASE_URL", "")
+MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
+HF_TOKEN = os.getenv("HF_TOKEN")
+
+# -------- SAFE OPENAI SETUP --------
+USE_API = False
+client = None
+
 try:
     from openai import OpenAI
-    client = OpenAI(
-        api_key=os.getenv("HF_TOKEN"),
-        base_url=os.getenv("API_BASE_URL"),
-    )
-    MODEL_NAME = os.getenv("MODEL_NAME") or "gpt-4o-mini"
-    USE_API = True
-except:
-    USE_API = False
+
+    if HF_TOKEN:
+        client = OpenAI(
+            api_key=HF_TOKEN,
+            base_url=API_BASE_URL if API_BASE_URL else None,
+        )
+        USE_API = True
+
+except Exception as e:
+    print("OpenAI init failed:", e)
 
 
+# -------- ACTION SELECTION --------
 def choose_action(state):
-    # Try OpenAI (if key exists)
-    if USE_API and os.getenv("HF_TOKEN"):
+    if USE_API and client:
         try:
             prompt = f"""
 State:
@@ -31,17 +41,19 @@ Choose best lane (0-3). Return only number.
                 messages=[{"role": "user", "content": prompt}],
             )
 
-            content = response.choices[0].message.content
-            if content:
-                lane = int(content.strip())
-                return max(0, min(3, lane))
-        except:
-            pass
+            content = response.choices[0].message.content.strip()
+            lane = int(content)
 
-    # ✅ FREE fallback (baseline logic)
+            return max(0, min(3, lane))
+
+        except Exception as e:
+            print("API failed, using fallback:", e)
+
+    # ✅ fallback
     return state["queue_lengths"].index(max(state["queue_lengths"]))
 
 
+# -------- RUN SINGLE TASK --------
 def run_task(mode):
     env = TrafficEnv(mode=mode)
     state = env.reset()
@@ -62,15 +74,15 @@ def run_task(mode):
         if done:
             break
 
-    print(f"[END] mode={mode}, total_reward={total_reward}\n")
+    print(f"[END] mode={mode}, total_reward={total_reward}")
 
 
-if __name__ == "__main__":
+# -------- MAIN INFERENCE FUNCTION --------
+def run_inference():
     for mode in ["easy", "medium", "hard"]:
         run_task(mode)
 
-    # 🔥 Keep container alive (IMPORTANT for HF Spaces)
-    import time
-    print("Inference completed. Keeping container alive...")
-    while True:
-        time.sleep(60)
+
+# -------- ENTRY POINT --------
+if __name__ == "__main__":
+    run_inference()
