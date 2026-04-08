@@ -10,7 +10,7 @@ def choose_action(state):
 # -------- MAIN INFERENCE --------
 def run_inference():
 
-    # ✅ FIXED: handle both env variable names
+    # handle env variables
     api_key = os.environ.get("API_KEY") or os.environ.get("OPENAI_API_KEY")
     base_url = os.environ.get("API_BASE_URL")
 
@@ -77,8 +77,9 @@ def run_inference():
             if done:
                 break
 
-        # -------- SCORE --------
-        score = max(0, min(1, -total_reward / 100))
+        # ✅ FIXED SCORE (STRICTLY BETWEEN 0 AND 1)
+        raw_score = -total_reward / 100
+        score = max(0.01, min(0.99, raw_score))
 
         print(
             f"[END] task={task} score={score:.2f} steps={steps}",
