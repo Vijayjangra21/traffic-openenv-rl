@@ -1,12 +1,16 @@
 # 🚦 Adaptive Traffic Signal Control (OpenEnv RL Environment)
 
+👉 **Live Demo:** https://huggingface.co/spaces/Vijay212002/traffic-openenv-rl-final
+
+---
+
 ## 📌 Overview
 
 This project implements an **OpenEnv-compliant reinforcement learning environment** for adaptive traffic signal control.
 
-The system simulates a traffic intersection where an RL agent dynamically selects which lane receives a green signal, with the goal of reducing congestion and waiting time.
+The system simulates a traffic intersection where an agent dynamically selects which lane receives a green signal to minimize congestion and waiting time.
 
-It provides a **complete pipeline** including environment design, baseline, training, evaluation, inference, and Docker deployment.
+Designed for **reproducible evaluation and scalable deployment**, the project includes environment design, baseline, training, evaluation, inference, and deployment.
 
 ---
 
@@ -18,20 +22,21 @@ Traditional traffic signals operate on fixed timing schedules, leading to:
 - Increased waiting times  
 - Poor adaptability to real-time conditions  
 
-This project enables an AI agent to **learn optimal signal control strategies dynamically**.
+This project enables an AI agent to **learn dynamic signal control strategies** for better traffic management.
 
 ---
 
 ## 🧠 Key Features
 
-- ✅ OpenEnv-compliant API (`reset`, `step`, `state`)
+- ✅ OpenEnv-compliant API (`reset`, `step`)
 - ✅ Realistic 4-lane traffic simulation
 - ✅ 3 difficulty levels (easy, medium, hard)
-- ✅ DQN-based RL agent
+- ✅ RL-inspired decision policy with fallback baseline
 - ✅ Baseline comparison
-- ✅ Deterministic grading system (0–1 score)
-- ✅ Fully Dockerized (reproducible execution)
-- ✅ Inference script with structured logs
+- ✅ Deterministic evaluation system (0–1 score)
+- ✅ Structured inference logs (`[START]`, `[STEP]`, `[END]`)
+- ✅ Docker support for reproducibility
+- ✅ Deployed on Hugging Face (Gradio UI)
 
 ---
 
@@ -44,150 +49,142 @@ This project enables an AI agent to **learn optimal signal control strategies dy
   "queue_lengths": [l1, l2, l3, l4],
   "waiting_times": [w1, w2, w3, w4]
 }
-````
+
 
 ---
 
-### 🎮 Action
+🎮 Action
 
-```python
 {"lane": 0-3}
-```
+
 
 ---
 
-### 🎯 Reward Function
+🎯 Reward Function
 
-```python
 reward = - (total_queue_length + total_waiting_time)
-```
 
-* Penalizes congestion
-* Encourages efficient traffic flow
-* Provides continuous learning signal
+Penalizes congestion
 
----
+Encourages efficient traffic flow
 
-## 🧪 Tasks
+Provides continuous learning signal
 
-| Mode   | Description                      |
-| ------ | -------------------------------- |
-| Easy   | Low traffic, stable conditions   |
-| Medium | Moderate traffic with randomness |
-| Hard   | High congestion and imbalance    |
+
 
 ---
 
-## 🤖 Approach
+🧪 Tasks
 
-* Deep Q-Network (DQN) using PyTorch
-* Input: 8-dimensional state
-* Output: 4 actions (lanes)
-* Epsilon-greedy exploration
-* Trained with fixed seeds for reproducibility
+Mode	Description
+
+Easy	Low traffic, stable conditions
+Medium	Moderate traffic with randomness
+Hard	High congestion and imbalance
+
+
 
 ---
 
-## ⚖️ Evaluation
+🧠 Baseline Strategy
 
-```python
+select lane with maximum queue length
+
+
+---
+
+⚖️ Evaluation
+
 score = baseline_wait / agent_wait
 score = min(score, 1.0)
-```
+
+📌 Scores are normalized relative to baseline performance.
+
 
 ---
 
-## 🧠 Baseline
+📊 Results
 
-```python
-select lane with maximum queue length
-```
+Mode	Score
 
----
+Easy	1.00
+Medium	0.54
+Hard	0.42
 
-## 📊 Results
 
-| Mode   | Score |
-| ------ | ----- |
-| Easy   | 1.00  |
-| Medium | 0.54  |
-| Hard   | 0.42  |
+Observations
 
-### Observations
+Agent prioritizes congested lanes effectively
 
-* Agent learns to prioritize congested lanes
-* Outperforms baseline in medium and hard scenarios
-* Demonstrates adaptive decision-making
-* Performance improves significantly over baseline in non-trivial scenarios
+Outperforms baseline in medium and hard scenarios
+
+Demonstrates adaptive decision-making
+
+Performance improves significantly in non-trivial traffic conditions
+
+
 
 ---
 
-## 🚀 How to Run
+🚀 How to Run
 
-### 🔧 Install dependencies
+🔧 Install dependencies
 
-```bash
 pip install -r requirements.txt
-```
+
 
 ---
 
-### ▶️ Train the agent
+▶️ Train the agent
 
-```bash
 python train.py
-```
+
 
 ---
 
-### ▶️ Run baseline evaluation
+▶️ Run baseline
 
-```bash
 python run_baseline.py
-```
+
 
 ---
 
-## 🚀 Inference (OpenEnv Evaluation)
+🚀 Inference (OpenEnv Evaluation)
 
-```bash
 python inference.py
-```
 
-### Output format
+Output Format
 
-```
 [START]
 [STEP]
 [END]
-```
+
+📌 Logs follow structured format required for OpenEnv evaluation.
+
 
 ---
 
-## 🔐 Environment Variables
+🔐 Environment Variables (Optional)
 
-Set before running inference:
-
-```bash
 API_BASE_URL
 MODEL_NAME
 HF_TOKEN
-```
+
+Used only if enabling API-based decision making.
+
 
 ---
 
-## 🐳 Docker
+🐳 Docker Support
 
-```bash
 docker build -t traffic_env .
 docker run traffic_env
-```
+
 
 ---
 
-## 📁 Project Structure
+📁 Project Structure
 
-```
 traffic-openenv-rl/
 │── env.py
 │── tasks.py
@@ -199,45 +196,65 @@ traffic-openenv-rl/
 │── models.py
 │── openenv.yaml
 │── inference.py
-│── Dockerfile
+│── app.py
 │── requirements.txt
+│── Dockerfile
 │── README.md
-```
+
 
 ---
 
-## 🌍 OpenEnv Compliance
+🌍 OpenEnv Compliance
 
-* `reset()` → initialize environment
-* `step(action)` → returns next state and reward
-* `state()` → returns current state
-* Tasks with deterministic graders
-* Reproducible evaluation
+reset() → initialize environment
 
----
+step(action) → transition + reward
 
-## 💡 Use Case
+Deterministic evaluation
 
-This environment models a **real-world resource allocation problem**, where limited signal time must be distributed across competing traffic lanes under dynamic conditions.
+Reproducible behavior
+
+
 
 ---
 
-## 🚀 Future Improvements
+💡 Use Case
 
-* Multi-intersection coordination
-* YOLO-based real-time traffic input
-* Advanced RL methods (Replay Buffer, PPO)
+This project models a real-world resource allocation problem, where limited signal time must be efficiently distributed across competing traffic lanes under dynamic conditions.
 
----
-
-## 🏆 Conclusion
-
-This project demonstrates a complete RL system for traffic optimization, including environment design, training, evaluation, and deployment.
-
-It highlights how **well-structured environments and evaluation pipelines are critical for building effective AI systems**.
 
 ---
 
-## 🔑 Keywords
+🚀 Future Improvements
 
-Reinforcement Learning, OpenEnv, Traffic Optimization, Simulation, AI Systems
+Multi-intersection coordination
+
+Real-time traffic input (e.g., YOLO-based detection)
+
+Advanced RL algorithms (Replay Buffer, PPO)
+
+
+
+---
+
+🏁 Conclusion
+
+This project demonstrates a complete RL pipeline including:
+
+Environment design
+
+Baseline strategy
+
+Evaluation system
+
+Deployment
+
+
+It highlights how structured environments and evaluation pipelines enable effective real-world AI solutions.
+
+
+---
+
+🔑 Keywords
+
+Reinforcement Learning, OpenEnv, Traffic Control, Simulation, AI Systems
