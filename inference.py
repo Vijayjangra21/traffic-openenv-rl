@@ -23,7 +23,9 @@ def run_inference():
         local_env = TrafficEnv(mode=mode)
         state = local_env.reset()
 
-        output += f"[START] mode={mode}\n"
+        start_line = f"[START] mode={mode}"
+        print(start_line, flush=True)
+        output += start_line + "\n"
 
         total_reward = 0
 
@@ -33,14 +35,19 @@ def run_inference():
             state, reward, done, _ = local_env.step({"lane": action_lane})
             total_reward += reward
 
-            output += f"[STEP] step={step}, action={action_lane}, reward={reward}\n"
+            step_line = f"[STEP] step={step}, action={action_lane}, reward={reward}"
+            print(step_line, flush=True)
+            output += step_line + "\n"
 
             if done:
                 break
 
-        output += f"[END] mode={mode}, total_reward={total_reward}\n\n"
+        end_line = f"[END] mode={mode}, total_reward={total_reward}"
+        print(end_line, flush=True)
+        output += end_line + "\n\n"
 
     return output
+
 
 # -------- API ENDPOINTS --------
 
@@ -48,6 +55,7 @@ def run_inference():
 def reset():
     state = env.reset()
     return {"state": state}
+
 
 @app.post("/step")
 def step(action: Action):
@@ -60,12 +68,8 @@ def step(action: Action):
         "info": info
     }
 
+
 # -------- HEALTH CHECK --------
 @app.get("/")
 def home():
     return {"message": "Traffic RL API running"}
-
-# -------- PRINT FOR VALIDATOR --------
-if __name__ == "__main__":
-    result = run_inference()
-    print(result, flush=True)
