@@ -1,0 +1,21 @@
+[project]
+name = "traffic-openenv-rl"
+version = "0.1.0"
+description = "Traffic Signal Control using OpenEnv"
+authors = [
+    { name = "Vijay" }
+]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "pydantic",
+    "numpy",
+    "openenv-core>=0.2.0"
+]
+
+[project.scripts]
+server = "server.app:main"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
