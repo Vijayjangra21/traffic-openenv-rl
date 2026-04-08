@@ -1,6 +1,14 @@
+import os
 from env import TrafficEnv
+from openai import OpenAI
 
-# -------- BASELINE ACTION --------
+# -------- INIT LLM CLIENT --------
+client = OpenAI(
+    base_url=os.environ.get("API_BASE_URL"),
+    api_key=os.environ.get("API_KEY"),
+)
+
+# -------- BASELINE FALLBACK --------
 def choose_action(state):
     return state["queue_lengths"].index(max(state["queue_lengths"]))
 
@@ -19,8 +27,33 @@ def run_inference():
         steps = 20
 
         for step in range(steps):
-            action_lane = choose_action(state)
 
+            # -------- LLM CALL --------
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "You are a traffic signal controller. Return ONLY a number between 0 and 3."
+                        },
+                        {
+                            "role": "user",
+                            "content": f"Queue lengths: {state['queue_lengths']}"
+                        }
+                    ],
+                )
+
+                action_lane = int(response.choices[0].message.content.strip())
+
+                if action_lane not in [0, 1, 2, 3]:
+                    action_lane = choose_action(state)
+
+            except Exception:
+                # fallback if API fails
+                action_lane = choose_action(state)
+
+            # -------- STEP --------
             state, reward, done, _ = env.step({"lane": action_lane})
             total_reward += reward
 
@@ -32,7 +65,7 @@ def run_inference():
             if done:
                 break
 
-        # normalize score between 0 and 1
+        # normalize score
         score = max(0, min(1, -total_reward / 100))
 
         print(
@@ -41,6 +74,6 @@ def run_inference():
         )
 
 
-# -------- SINGLE ENTRY POINT (CRITICAL) --------
+# -------- ENTRY POINT --------
 if __name__ == "__main__":
     run_inference()
