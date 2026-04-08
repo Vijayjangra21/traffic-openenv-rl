@@ -1,75 +1,46 @@
-import os
-from fastapi import FastAPI
-from pydantic import BaseModel
 from env import TrafficEnv
-
-# -------- INIT --------
-app = FastAPI()
-env = TrafficEnv(mode="medium")
-
-# -------- REQUEST MODEL --------
-class Action(BaseModel):
-    lane: int
 
 # -------- BASELINE ACTION --------
 def choose_action(state):
     return state["queue_lengths"].index(max(state["queue_lengths"]))
 
-# -------- REQUIRED FUNCTION --------
+
+# -------- MAIN INFERENCE --------
 def run_inference():
-    output = ""
+    tasks = ["easy", "medium", "hard"]
 
-    for mode in ["easy", "medium", "hard"]:
-        local_env = TrafficEnv(mode=mode)
-        state = local_env.reset()
+    for task in tasks:
+        env = TrafficEnv(mode=task)
+        state = env.reset()
 
-        start_line = f"[START] mode={mode}"
-        print(start_line, flush=True)
-        output += start_line + "\n"
+        print(f"[START] task={task}", flush=True)
 
         total_reward = 0
+        steps = 20
 
-        for step in range(20):
+        for step in range(steps):
             action_lane = choose_action(state)
 
-            state, reward, done, _ = local_env.step({"lane": action_lane})
+            state, reward, done, _ = env.step({"lane": action_lane})
             total_reward += reward
 
-            step_line = f"[STEP] step={step}, action={action_lane}, reward={reward}"
-            print(step_line, flush=True)
-            output += step_line + "\n"
+            print(
+                f"[STEP] step={step}, action={action_lane}, reward={reward}",
+                flush=True
+            )
 
             if done:
                 break
 
-        end_line = f"[END] mode={mode}, total_reward={total_reward}"
-        print(end_line, flush=True)
-        output += end_line + "\n\n"
+        # normalize score between 0 and 1
+        score = max(0, min(1, -total_reward / 100))
 
-    return output
-
-
-# -------- API ENDPOINTS --------
-
-@app.post("/reset")
-def reset():
-    state = env.reset()
-    return {"state": state}
+        print(
+            f"[END] task={task} score={score:.2f} steps={steps}",
+            flush=True
+        )
 
 
-@app.post("/step")
-def step(action: Action):
-    state, reward, done, info = env.step({"lane": action.lane})
-
-    return {
-        "state": state,
-        "reward": float(reward),
-        "done": bool(done),
-        "info": info
-    }
-
-
-# -------- HEALTH CHECK --------
-@app.get("/")
-def home():
-    return {"message": "Traffic RL API running"}
+# -------- SINGLE ENTRY POINT (CRITICAL) --------
+if __name__ == "__main__":
+    run_inference()
